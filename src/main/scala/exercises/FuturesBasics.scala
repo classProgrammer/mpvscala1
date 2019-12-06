@@ -1,9 +1,5 @@
 package exercises
 
-
-import basics.Futures.combine
-
-import scala.collection.View.Collect
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 // imports execution context for implicit passing
@@ -64,6 +60,11 @@ object FuturesBasics extends App {
   def generateRandomSet(start: Int, end: Int, upperBound: Int): Seq[Int] = {
     val rand = scala.util.Random
     (start to end).map(x => rand.nextInt(upperBound));
+  }
+
+  def generateRandomSet(noOfElements: Int, upperBound: Int): Seq[Int] = {
+    val rand = scala.util.Random
+    (1 to noOfElements).map(x => rand.nextInt(upperBound));
   }
 
   def getMax(collection: Seq[Int]): Int = {

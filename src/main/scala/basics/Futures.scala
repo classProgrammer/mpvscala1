@@ -111,15 +111,14 @@ object Futures extends App {
 
   // example: doInParallel(doWork(...), doWork(...))
   def doInParallel_v1[U, V](block1: => Unit, block2: => Unit): Future[Unit] = {
-    val f1 = Future{ block1 }
+    val f1: Future[Unit] = Future{ block1 }
 
-    val f2 = Future{ block2 }
+    val f2: Future[Unit] = Future{ block2 }
 
-    val f3: Future[Unit] = Future{
+    Future{
       Await.ready(f1, Duration.Inf);
       Await.ready(f2, Duration.Inf);
     }
-    f3
   }
 
   // use pair

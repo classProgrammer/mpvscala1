@@ -9,7 +9,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object ParallelQuickSort extends App{
   //implicit val ec: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
 
-  def quickSort[T](seq: Seq[T])(implicit ord: Ordering[T]): Seq[T] = {
+  def quickSort[T](seq: Seq[T])
+                  (implicit ord: Ordering[T]): Seq[T] = {
     if (seq.length <= 1) seq
     else {
       val pivot = seq(seq.length / 2)
@@ -19,7 +20,8 @@ object ParallelQuickSort extends App{
     }
   }
 
-  def parallelQuickSort[T](seq: Seq[T], threshHold: Int)(implicit ord: Ordering[T]): Seq[T] = {
+  def parallelQuickSort[T](seq: Seq[T], threshHold: Int)
+                          (implicit ord: Ordering[T]): Seq[T] = {
     if (seq.length <= 1) seq
     else {
       val newLenght = seq.length / 2
@@ -51,7 +53,8 @@ object ParallelQuickSort extends App{
     }
   }
 
-  def parallelQuickSort[T](seq: Seq[T], threshHold: Int, ctx: ExecutionContextExecutor)(implicit ord: Ordering[T]): Seq[T] = {
+  def parallelQuickSort[T](seq: Seq[T], threshHold: Int, ctx: ExecutionContextExecutor)
+                          (implicit ord: Ordering[T]): Seq[T] = {
     if (seq.length <= 1) seq
     else {
       val newLenght = seq.length / 2
@@ -91,7 +94,7 @@ object ParallelQuickSort extends App{
     def compare(left:Int, right:Int) = right compare left
   }
 
-  object Weired extends Ordering[Int] {
+  object Weirdscender extends Ordering[Int] {
     def compare(left:Int, right:Int): Int = {
       val a = left % 2
       val b = right % 2
@@ -127,7 +130,7 @@ object ParallelQuickSort extends App{
     // explicit 1
     val res2 = quickSort(arr)(Descender)
 
-    val comp: Ordering[Int] = Weired
+    val comp: Ordering[Int] = Weirdscender
     // explicit 2
     val res3 = quickSort(arr)(comp)
 

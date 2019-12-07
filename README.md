@@ -1,6 +1,7 @@
 # mpvscala1
 
 ## 1.1)
+```text
 ======== MAIN ======== (thread id=1)
 non blocking? (thread id=1)
 2: 1 (thread id=15)
@@ -31,12 +32,14 @@ sets = (Vector(7, 4, 7, 10, 2, 9),Vector(3, 7, 3, 5, 7, 10)) (thread id=16)
 the sum of the maximums is = 20 (thread id=16)
 
 Process finished with exit code 0
+```
 
 
 ## 1.2)
 Experimenting with the thread pools brought no speedup,
 Changing the threshhold brought a small speedup.
 Parallel is much faster than  sequential.
+```text
 ========== START OF otherTestProgram ==========
   ===== RUN of quicksort for 1000000 elements =====
       runtime: 0.6125874 sec
@@ -61,16 +64,19 @@ Parallel is much faster than  sequential.
   == Speedup parallel/threadpool_sheduled = 0.9542178100454101
   ===== END OF testThreadpools =====
 ========== END OF otherTestProgram ==========
+```
 
 ## 1.3)
 Max1 and Max2 deliver the same result
-
+```text
 6
 6
 
 Process finished with exit code 0
+```
 
 ## 1.4)
+```text
 blocking?
 Retry number 1
 Retry number 2
@@ -92,3 +98,4 @@ Retry number 7
 RESULT = 479
 
 Process finished with exit code 0
+```

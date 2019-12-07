@@ -53,7 +53,7 @@ object AdvancedFuture2 extends App {
   }
 
   def main(): Unit = {
-    val a: Future[Int] = retryAsync(produce, Duration.create(250, TimeUnit.MILLISECONDS) , 5)
+    val a: Future[Int] = retryAsync(produce, Duration.create(250, TimeUnit.MILLISECONDS) , 10)
     println("blocking?")
     a.foreach(x => println(s"RESULT = $x"))
     a.failed.foreach(ex => println(ex))

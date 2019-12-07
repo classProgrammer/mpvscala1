@@ -6,6 +6,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import javax.naming.directory.InvalidAttributeValueException
 
 object AdvancedFuture extends App {
+  // 1.3 a)
   def parallelMax1(list: List[Int], parts: Int): Future[Int] = {
     Future {
       val size = list.size
@@ -39,7 +40,7 @@ object AdvancedFuture extends App {
       max
     }
   }
-
+  // 1.3 b)
   def parallelMax2(list: List[Int], parts: Int): Future[Int] = {
     Future {
       val size = list.size
@@ -74,7 +75,7 @@ object AdvancedFuture extends App {
       max
     }
   }
-
+  // 1.3 b)
   def sequenceRecur[T](values: List[T], futures: List[Future[T]]): List[T] = {
     if (futures.isEmpty) return values
 
@@ -86,7 +87,7 @@ object AdvancedFuture extends App {
     Await.ready(first, Duration.Inf)
     sequenceRecur(v :: values, futures.tail)
   }
-
+// 1.3 b)
   def myFutureSequence[T](futures: List[Future[T]]): Future[List[T]] = {
     Future {
       sequenceRecur(List.empty[T], futures)

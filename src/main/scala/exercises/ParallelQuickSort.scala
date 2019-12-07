@@ -119,6 +119,7 @@ object ParallelQuickSort extends App{
     (stop - start) / 1000000000.0
   }
 
+  // 1.1)
   def smallTestProgram(): Unit = {
     val arr = Seq(1,4,7,2,3,9,7,5,10,12,4)
     // implicit

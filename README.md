@@ -116,28 +116,42 @@ Process finished with exit code 0
 ## 1.4) Retry: Advanced Future Concepts Part 2
 ```text
 ======== START test with 30 retries and Success Ratio of 1/10 ========
-   Retry number 1
-   Retry number 2
-   Retry number 3
-   Retry number 4
-   Retry number 5
-   Retry number 6
-   Retry number 7
-   Retry number 8
-   Retry number 9
-   RESULT = 404
+   Retries left 30
+   Retries left 29
+   Retries left 28
+   Retries left 27
+   Retries left 26
+   Retries left 25
+   Retries left 24
+   Retries left 23
+   Retries left 22
+   Retries left 21
+   Retries left 20
+   Retries left 19
+   Retries left 18
+   Retries left 17
+   Retries left 16
+   Retries left 15
+   Retries left 14
+   Retries left 13
+   Retries left 12
+   Retries left 11
+   Retries left 10
+   RESULT = 382
 ======== END test ========
 
 ======== START test with 5 retries and Success Ratio of 1/100 ========
-   Retry number 1
-   Retry number 2
-   Retry number 3
-   Retry number 4
-   Retry number 5
+   Retries left 5
+   Retries left 4
+   Retries left 3
+   Retries left 2
+   Retries left 1
    java.lang.Exception: Computation failed too often
 ======== END test ========
 
 ======== START test with 100 retries and Success Ratio of 1 ========
-   RESULT = 764
+   RESULT = 10
 ======== END test ========
+
+Process finished with exit code 0
 ```

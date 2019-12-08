@@ -2,7 +2,9 @@ package exercises
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{Scheduler}
+import akka.actor.Scheduler
+
+import scala.annotation.tailrec
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.concurrent.duration.{Duration, FiniteDuration}
 
@@ -16,32 +18,26 @@ object AdvancedFuture2 extends App {
     Await.ready(future, Duration.Inf)
   }
 
+  def getValue[T](p: Promise[T], computation: => T, delay: FiniteDuration, retries: Int)(ec: ExecutionContext, s: Scheduler): Unit = {
+    Future {
+      if (retries == 0) p failure new Exception("Computation failed too often")
+      val f = Future { computation }(ec)
+      f.foreach(x => p success x)(ec)
+      f.failed.foreach(_ => {
+          s.scheduleOnce(delay) {
+            println(s"   Retries left $retries")
+            getValue(p, computation, delay, retries - 1)(ec, s)
+          }(ec)
+        }
+      )(ec)
+    }(ec)
+  }
+
   def retryAsync[T](computation: => T, delay: FiniteDuration, retries: Int)
                    (implicit ec: ExecutionContext, s: Scheduler): Future[T] = {
-    val result: Future[T] = Future {
-      val nullValue: T = null.asInstanceOf[T]
-      var res: T = nullValue
-      var i = 0
-
-      val f: Future[T] = Future(computation)
-      f.foreach(value => res = value)
-      waitFor(f)
-
-      while (res == nullValue && i < retries) {
-        i += 1
-        println(s"   Retry number $i")
-        val p = Promise[T]()
-        scheduler.scheduleOnce(delay) {
-          p.future.foreach(value => res = value)
-          p completeWith Future(computation)
-        }
-        waitFor(p.future)
-      }
-
-      if (res != nullValue) res
-      else throw new Exception("Computation failed too often")
-    }
-    result
+    val p = Promise[T]()
+    getValue(p, computation, delay, retries)(ec, s)
+    p.future
   }
 
   val generator = scala.util.Random
@@ -63,7 +59,7 @@ object AdvancedFuture2 extends App {
   }
 
   def test[T](retries: Int, producer: => T, probability: String): Unit = {
-    val a: Future[T] = retryAsync(producer, Duration.create(250, TimeUnit.MILLISECONDS) , retries)
+    val a: Future[T] = retryAsync(producer, Duration.create(250, TimeUnit.MILLISECONDS), retries)
     println(s"======== START test with $retries retries and Success Ratio of $probability ========")
     a.foreach(x => println(s"   RESULT = $x"))
     a.failed.foreach(ex => println(s"   $ex"))
@@ -75,5 +71,6 @@ object AdvancedFuture2 extends App {
   test(30, produce1outta10, "1/10")
   test(5, produce1outta100, "1/100")
   test(100, produceAlways, "1")
+
   Await.ready(system.terminate(), Duration.Inf)
 }

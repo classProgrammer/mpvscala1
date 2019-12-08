@@ -49,7 +49,6 @@ object ParallelQuickSort extends App{
         Await.ready(tupleResult, Duration.Inf)
         result
       }
-
     }
   }
 
@@ -124,6 +123,7 @@ object ParallelQuickSort extends App{
 
   // 1.1)
   def smallTestProgram(): Unit = {
+    println("========== START OF smallTestProgram ==========")
     val arr = Seq(1,4,7,2,3,9,7,5,10,12,4)
     // implicit
     val res1 = quickSort(arr)
@@ -134,9 +134,9 @@ object ParallelQuickSort extends App{
     // explicit 2
     val res3 = quickSort(arr)(comp)
 
-    println(s"ascending: $res1")
-    println(s"descending: $res2")
-    println(s"even left, odd right sorted ascending: $res3")
+    println(s"   sequential.ascending: $res1")
+    println(s"   sequential.: $res2")
+    println(s"   sequential.even left, odd right sorted ascending: $res3")
 
     // implicit
     val res4 = parallelQuickSort(arr, 2)
@@ -146,9 +146,10 @@ object ParallelQuickSort extends App{
     // explicit 2
     val res6 = parallelQuickSort(arr, 2)(comp)
 
-    println(s"ascending: $res4")
-    println(s"descending: $res5")
-    println(s"even left, odd right sorted ascending: $res6")
+    println(s"   parallel.ascending: $res4")
+    println(s"   parallel.descending: $res5")
+    println(s"   parallel.even left, odd right sorted ascending: $res6")
+    println("========== END OF smallTestProgram ==========")
   }
 
   def testThreshhold[T](testSet: Seq[T], thLower: Int, thUpper: Int, orderer: Ordering[T]): (Double, Int) = {
@@ -242,7 +243,7 @@ object ParallelQuickSort extends App{
 
     println("========== END OF otherTestProgram ==========")
   }
-
+  smallTestProgram()
   otherTestProgram()
-
+  println("================= End of Program =================")
 }

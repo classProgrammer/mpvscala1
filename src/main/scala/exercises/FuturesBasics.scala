@@ -126,5 +126,6 @@ object FuturesBasics extends App {
   val example1 = maxWithDoInParallel(10, 11)
   println("blocking?")
   Await.ready(example1, Duration.Inf)
-  example1 foreach(res => println(s"the sum of the maximums is = $res"))
+  example1 foreach(res => println(s"the sum of maxima is = $res"))
+  Thread.sleep(50)
 }

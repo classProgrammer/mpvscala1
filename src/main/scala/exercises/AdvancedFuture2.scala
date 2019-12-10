@@ -1,10 +1,7 @@
 package exercises
 
 import java.util.concurrent.TimeUnit
-
 import akka.actor.Scheduler
-
-import scala.annotation.tailrec
 import scala.concurrent.{Await, ExecutionContext, Future, Promise}
 import scala.concurrent.duration.{Duration, FiniteDuration}
 

@@ -43,10 +43,10 @@ object ParallelQuickSort extends App{
         val tupleResult = FuturesBasics.doInParallel(fLeft, fRight)
 
         var result: Seq[T] = null
-        tupleResult.map(tuple => {
+        val resReady: Future[Unit] = tupleResult.map(tuple => {
           result = Seq.concat(tuple._1, middle, tuple._2)
         })
-        Await.ready(tupleResult, Duration.Inf)
+        Await.ready(resReady, Duration.Inf)
         result
       }
     }
@@ -75,13 +75,12 @@ object ParallelQuickSort extends App{
         val tupleResult = FuturesBasics.doInParallel(fLeft, fRight)
 
         var result: Seq[T] = null
-        tupleResult.map(tuple => {
+        val resReady: Future[Unit] = tupleResult.map(tuple => {
           result = Seq.concat(tuple._1, middle, tuple._2)
         })(ctx)
-        Await.ready(tupleResult, Duration.Inf)
+        Await.ready(resReady, Duration.Inf)
         result
       }
-
     }
   }
 

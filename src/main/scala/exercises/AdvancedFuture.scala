@@ -4,7 +4,6 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 // imports execution context for implicit passing
 import scala.concurrent.ExecutionContext.Implicits.global
-import javax.naming.directory.InvalidAttributeValueException
 
 object AdvancedFuture extends App {
   // 1.3 a)
@@ -28,15 +27,14 @@ object AdvancedFuture extends App {
       })
 
       var max = Int.MinValue
-      futureList.foreach(value =>
-        value.foreach(v =>{
-          if (v > max) max = v
+      futureList.foreach(list =>
+        list.foreach(value =>{
+          if (value > max) max = value
         })
       )
 
-      val x: Future[List[Int]] = Future.sequence(futureList)
-      Await.ready(x, Duration.Inf)
-
+      val computation: Future[List[Int]] = Future.sequence(futureList)
+      Await.ready(computation, Duration.Inf)
       max
     }
   }
@@ -61,14 +59,14 @@ object AdvancedFuture extends App {
       })
 
       var max = Int.MinValue
-      futureList.foreach(value =>
-        value.foreach(v => {
-          if (v > max) max = v
+      futureList.foreach(list =>
+        list.foreach(value => {
+          if (value > max) max = value
         })
       )
 
-      val x: Future[List[Int]] = myFutureSequence(futureList)
-      Await.ready(x, Duration.Inf)
+      val computation: Future[List[Int]] = myFutureSequence(futureList)
+      Await.ready(computation, Duration.Inf)
 
       max
     }
@@ -79,11 +77,11 @@ object AdvancedFuture extends App {
     if (futures.isEmpty) return values
 
     val first = futures.head
-    var v: T = null.asInstanceOf[T]
-    first.foreach(value => { v = value })
+    var current: T = null.asInstanceOf[T]
     first.failed.foreach(ex => throw ex)
-    Await.result(first, Duration.Inf)
-    sequenceRecur(v :: values, futures.tail)
+    val result: Future[Unit] = first.map(value => current = value)
+    Await.result(result, Duration.Inf)
+    sequenceRecur(current :: values, futures.tail)
   }
 // 1.3 b)
   def myFutureSequence[T](futures: List[Future[T]]): Future[List[T]] = {

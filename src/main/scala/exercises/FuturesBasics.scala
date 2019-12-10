@@ -77,31 +77,23 @@ object FuturesBasics extends App {
 
   def maxWithDoInParallel(sizeOfSet: Int, upperBound: Int): Future[Int] = {
     // 1) Generate Random Set
-    val f1: Future[Seq[Int]] = Future{
-      generateRandomSet(0, sizeOfSet/2, upperBound)
+    val generateSet: Future[Seq[Int]] = Future{
+      generateRandomSet(0, sizeOfSet, upperBound)
     }
-    val f2: Future[Seq[Int]] = Future{
-      generateRandomSet(sizeOfSet/2, sizeOfSet, upperBound)
-    }
-    // 2) "Split" in 2 Parts
-    val sets: Future[(Seq[Int], Seq[Int])] = doInParallel(f1, f2)
 
-    val s: Future[(Int, Int)] = sets.flatMap(r => {
-      println(s"sets = $r")
-      val joined = r._1 ++ r._2 // join them just to slit them again is pretty useless but it matches the given description
-      val subsets: (Seq[Int], Seq[Int]) = joined.splitAt(sizeOfSet / 2)
-
+    val sums: Future[(Int, Int)] = generateSet.flatMap(set => {
+      // 2) "Split" in 2 Parts
+      val subsets: (Seq[Int], Seq[Int]) = set.splitAt(sizeOfSet / 2)
+      println(s"subsets: $subsets") // only to check correctness
       // 3) Max of Each
-      val f1: Future[Int] = Future { getMax(subsets._1) }
-      val f2: Future[Int] = Future { getMax(subsets._2) }
+      val left: Future[Int] = Future { getMax(subsets._1) }
+      val right: Future[Int] = Future { getMax(subsets._2) }
 
-      val f: Future[(Int, Int)] = doInParallel(f1, f2)
-      f
+      doInParallel(left, right)
     })
 
     // 4) Add Result
-    val sum: Future[Int] = s.map(r => r._1 + r._2)
-    sum
+    sums.map(tuple => tuple._1 + tuple._2)
   }
 
   println("======== MAIN ========")
@@ -122,6 +114,17 @@ object FuturesBasics extends App {
   version_2.failed foreach(ex => println(s"f2: exception : $ex"))
   println("blocking?")
   Await.ready(version_2, Duration.Inf)
+
+  val f3 = Future{ compute(1, 5, 60) }
+  val f4 = Future{ compute(2, 5, 40) }
+  val version_3 = doInParallelWithFlatMap(f3, f4)
+
+  version_3        foreach(tuple => {
+    val sum = tuple._1 + tuple._2
+    println(s"version 3: sum = $sum")
+  })
+  version_3.failed foreach(ex => println(s"f2: exception : $ex"))
+  Await.ready(version_3, Duration.Inf)
 
   val example1 = maxWithDoInParallel(10, 11)
   println("blocking?")

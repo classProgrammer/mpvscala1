@@ -51,7 +51,7 @@ object ParallelQuickSort extends App{
 
   def parallelQuickSort[T](seq: Seq[T], threshHold: Int, ctx: ExecutionContextExecutor)
                           (implicit ord: Ordering[T]): Future[Seq[T]] = {
-    if (seq.length <= 1) Future { seq }
+    if (seq.length <= 1) Future { seq }(ctx)
     else {
 
       val newLenght = seq.length / 2
@@ -61,7 +61,7 @@ object ParallelQuickSort extends App{
           Seq.concat(quickSort(seq filter (ord.lt(_, pivot))),
             seq filter (ord.equiv(_, pivot)),
             quickSort(seq filter (ord.gt(_, pivot))))
-        }
+        }(ctx)
       }
       else {
         val fLeft = Future{
@@ -74,7 +74,7 @@ object ParallelQuickSort extends App{
 
         val tupleResult = FuturesBasics.doInParallel(fLeft, fRight)
 
-        for (tuple <- tupleResult) yield Seq.concat(tuple._1, middle, tuple._2)
+        tupleResult.map(tuple => Seq.concat(tuple._1, middle, tuple._2))(ctx)
       }
     }
   }

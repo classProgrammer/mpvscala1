@@ -21,15 +21,17 @@ object ParallelQuickSort extends App{
   }
 
   def parallelQuickSort[T](seq: Seq[T], threshHold: Int)
-                          (implicit ord: Ordering[T]): Seq[T] = {
-    if (seq.length <= 1) seq
+                          (implicit ord: Ordering[T]): Future[Seq[T]] = {
+    if (seq.length <= 1) Future{ seq }
     else {
       val newLenght = seq.length / 2
       val pivot = seq(newLenght)
       if (newLenght <= threshHold) {
-        Seq.concat(quickSort(seq filter (ord.lt(_, pivot))),
-          seq filter (ord.equiv(_, pivot)),
-          quickSort(seq filter (ord.gt(_, pivot))))
+        Future {
+          Seq.concat(quickSort(seq filter (ord.lt(_, pivot))),
+            seq filter (ord.equiv(_, pivot)),
+            quickSort(seq filter (ord.gt(_, pivot))))
+        }
       }
       else {
         val fLeft = Future{
@@ -42,26 +44,24 @@ object ParallelQuickSort extends App{
 
         val tupleResult = FuturesBasics.doInParallel(fLeft, fRight)
 
-        var result: Seq[T] = null
-        val resReady: Future[Unit] = tupleResult.map(tuple => {
-          result = Seq.concat(tuple._1, middle, tuple._2)
-        })
-        Await.ready(resReady, Duration.Inf)
-        result
+        for (tuple <- tupleResult) yield Seq.concat(tuple._1, middle, tuple._2)
       }
     }
   }
 
   def parallelQuickSort[T](seq: Seq[T], threshHold: Int, ctx: ExecutionContextExecutor)
-                          (implicit ord: Ordering[T]): Seq[T] = {
-    if (seq.length <= 1) seq
+                          (implicit ord: Ordering[T]): Future[Seq[T]] = {
+    if (seq.length <= 1) Future { seq }
     else {
+
       val newLenght = seq.length / 2
       val pivot = seq(newLenght)
       if (newLenght <= threshHold) {
-        Seq.concat(quickSort(seq filter (ord.lt(_, pivot))),
-          seq filter (ord.equiv(_, pivot)),
-          quickSort(seq filter (ord.gt(_, pivot))))
+        Future {
+          Seq.concat(quickSort(seq filter (ord.lt(_, pivot))),
+            seq filter (ord.equiv(_, pivot)),
+            quickSort(seq filter (ord.gt(_, pivot))))
+        }
       }
       else {
         val fLeft = Future{
@@ -74,12 +74,7 @@ object ParallelQuickSort extends App{
 
         val tupleResult = FuturesBasics.doInParallel(fLeft, fRight)
 
-        var result: Seq[T] = null
-        val resReady: Future[Unit] = tupleResult.map(tuple => {
-          result = Seq.concat(tuple._1, middle, tuple._2)
-        })(ctx)
-        Await.ready(resReady, Duration.Inf)
-        result
+        for (tuple <- tupleResult) yield Seq.concat(tuple._1, middle, tuple._2)
       }
     }
   }
@@ -139,15 +134,20 @@ object ParallelQuickSort extends App{
 
     // implicit
     val res4 = parallelQuickSort(arr, 2)
+    res4 foreach(set => println(s"   res4: parallel.ascending: $set"))
+    res4.failed.foreach(ex => println(s"   res4 EX: $ex"))
+    Await.ready(res4, Duration.Inf)
     // explicit 1
     val res5 = parallelQuickSort(arr, 2)(Descender)
-
+    res5 foreach(set => println(s"   res5: parallel.ascending: $set"))
+    res5.failed.foreach(ex => println(s"   res5 EX: $ex"))
+    Await.ready(res5, Duration.Inf)
     // explicit 2
     val res6 = parallelQuickSort(arr, 2)(comp)
+    res6 foreach(set => println(s"   res6: parallel.ascending: $set"))
+    res6.failed.foreach(ex => println(s"   res6 EX: $ex"))
+    Await.ready(res6, Duration.Inf)
 
-    println(s"   parallel.ascending: $res4")
-    println(s"   parallel.descending: $res5")
-    println(s"   parallel.even left, odd right sorted ascending: $res6")
     println("========== END OF smallTestProgram ==========")
   }
 
@@ -160,7 +160,10 @@ object ParallelQuickSort extends App{
     var bestThreshold = Int.MinValue
 
     (thLower to thUpper).foreach(th => {
-      val runtime: Double = time(parallelQuickSort(testSet, th)(orderer))
+      val runtime: Double = time({
+        val f: Future[Seq[T]] = parallelQuickSort(testSet, th)(orderer)
+        Await.ready(f, Duration.Inf)
+      })
       if (runtime < bestRuntime) {
         bestRuntime = runtime
         bestLabel = s"      parallel quicksort with th:$th was best for $elements elements\n" +
@@ -177,7 +180,10 @@ object ParallelQuickSort extends App{
     //implicit val ec = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
     val elements = testSet.size
 
-    var bestRuntime = time(parallelQuickSort(testSet, bestThreshhold)(orderer))
+    var bestRuntime = time({
+      val f: Future[Seq[T]] = parallelQuickSort(testSet, bestThreshhold)(orderer)
+      Await.ready(f, Duration.Inf)
+    })
     var bestLabel = s"      parallel quicksort with GLOBALS threadpool was best for $elements elements\n" +
       s"      with a runtime of $bestRuntime seconds"
     var bestThreadAmount = Double.MinValue
@@ -185,7 +191,10 @@ object ParallelQuickSort extends App{
     (threadpoolLower to threadpoolUpper).foreach(threadsInPool => {
       val executionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(threadsInPool))
 
-      val runtime: Double = time(parallelQuickSort(testSet, bestThreshhold, executionContext)(orderer))
+      val runtime: Double = time({
+        val f: Future[Seq[T]] = parallelQuickSort(testSet, bestThreshhold, executionContext)(orderer)
+        Await.ready(f, Duration.Inf)
+      })
       if (runtime < bestRuntime) {
         bestRuntime = runtime
         bestThreadAmount = threadsInPool
@@ -201,8 +210,11 @@ object ParallelQuickSort extends App{
     //implicit val ec = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
     val elements = testSet.size
 
-    var bestRuntime = time(parallelQuickSort(testSet, bestThreshhold, context)(orderer))
-    var bestLabel = s"      parallel quicksort with GLOBALS threadpool was best for $elements elements\n" +
+    val bestRuntime = time({
+      val f: Future[Seq[T]] = parallelQuickSort(testSet, bestThreshhold, context)(orderer)
+      Await.ready(f, Duration.Inf)
+    })
+    val bestLabel = s"      parallel quicksort with GLOBALS threadpool was best for $elements elements\n" +
       s"      with a runtime of $bestRuntime seconds"
 
     println(bestLabel)

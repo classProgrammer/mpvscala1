@@ -3,33 +3,73 @@
 ## 1.1) Future Basics
 ```text
 ======== MAIN ======== (thread id=1)
-non blocking? (thread id=1)
-2: 1 (thread id=15)
-2: 2 (thread id=15)
-2: 3 (thread id=15)
-2: 4 (thread id=15)
-2: 5 (thread id=15)
-1: 1 (thread id=15)
-1: 2 (thread id=15)
-1: 3 (thread id=15)
-1: 4 (thread id=15)
-1: 5 (thread id=15)
-() (thread id=14)
-compute 1: 1 (thread id=14)
-compute 2: 1 (thread id=15)
-blocking? (thread id=1)
-compute 1: 2 (thread id=14)
-compute 2: 2 (thread id=15)
-compute 1: 3 (thread id=14)
-compute 2: 3 (thread id=15)
-compute 1: 4 (thread id=14)
-compute 2: 4 (thread id=15)
-compute 1: 5 (thread id=14)
-compute 2: 5 (thread id=15)
-version 2: sum = 100 (thread id=16)
-blocking? (thread id=1)
-sets = (Vector(7, 4, 7, 10, 2, 9),Vector(3, 7, 3, 5, 7, 10)) (thread id=16)
-the sum of the maxima is = 20 (thread id=16)
+======== MAIN ======== (thread id=1)
+   === Version 1 Test 1 (thread id=1)
+            2: 1 (thread id=14)
+            1: 1 (thread id=15)
+            2: 2 (thread id=14)
+            1: 2 (thread id=15)
+            2: 3 (thread id=14)
+            1: 3 (thread id=15)
+            1: 4 (thread id=15)
+            2: 4 (thread id=14)
+            1: 5 (thread id=15)
+            2: 5 (thread id=14)
+         v_1: () (thread id=15)
+   === Version 1 Test 2 (thread id=1)
+            2: 1 (thread id=15)
+            1: 1 (thread id=14)
+            1: 2 (thread id=14)
+            2: 2 (thread id=15)
+            1: 3 (thread id=14)
+            2: 3 (thread id=15)
+            1: 4 (thread id=14)
+            2: 4 (thread id=15)
+            2: 5 (thread id=15)
+            1: 5 (thread id=14)
+            1: 6 (thread id=14)
+   === Version 2 (thread id=1)
+         FAILED v_1_2: java.lang.IllegalArgumentException (thread id=14)
+            compute 1: 1 (thread id=14)
+            compute 2: 1 (thread id=15)
+            compute 1: 2 (thread id=14)
+            compute 2: 2 (thread id=15)
+            compute 1: 3 (thread id=14)
+            compute 2: 3 (thread id=15)
+            compute 1: 4 (thread id=14)
+            compute 2: 4 (thread id=15)
+            compute 1: 5 (thread id=14)
+            compute 2: 5 (thread id=15)
+   === Version 3 (thread id=1)
+            compute 1: 1 (thread id=15)
+            combine 1 (thread id=16)
+            compute 2: 1 (thread id=14)
+            compute 1: 2 (thread id=15)
+            compute 2: 2 (thread id=14)
+            combine 2 (thread id=16)
+            compute 1: 3 (thread id=15)
+            compute 2: 3 (thread id=14)
+            combine 3 (thread id=16)
+            compute 1: 4 (thread id=15)
+            compute 2: 4 (thread id=14)
+            combine 4 (thread id=16)
+            compute 1: 5 (thread id=15)
+            combine 5 (thread id=16)
+            compute 2: 5 (thread id=14)
+         version 2: sum = 100 (thread id=16)
+            combine 1 (thread id=16)
+subsets: (Vector(5, 1, 6, 1, 5),Vector(1, 8, 9, 6, 8, 10)) (thread id=15)
+            combine 1 (thread id=15)
+            combine 2 (thread id=16)
+            combine 2 (thread id=15)
+            combine 3 (thread id=16)
+            combine 3 (thread id=15)
+            combine 4 (thread id=16)
+            combine 4 (thread id=15)
+            combine 5 (thread id=16)
+            combine 5 (thread id=15)
+         version 3: sum = 100 (thread id=16)
+         v_4 sum is = 16 (thread id=15)
 
 Process finished with exit code 0
 ```
@@ -44,32 +84,34 @@ Parallel is much faster than  sequential.
    sequential.ascending: List(1, 2, 3, 4, 4, 5, 7, 7, 9, 10, 12)
    sequential.: List(12, 10, 9, 7, 7, 5, 4, 4, 3, 2, 1)
    sequential.even left, odd right sorted ascending: List(2, 4, 4, 10, 12, 1, 3, 5, 7, 7, 9)
-   parallel.ascending: List(1, 2, 3, 4, 4, 5, 7, 7, 9, 10, 12)
-   parallel.descending: List(12, 10, 9, 7, 7, 5, 4, 4, 3, 2, 1)
-   parallel.even left, odd right sorted ascending: List(2, 4, 4, 10, 12, 1, 3, 5, 7, 7, 9)
+   res4: parallel.ascending: List(1, 2, 3, 4, 4, 5, 7, 7, 9, 10, 12)
+   res5: parallel.ascending: List(12, 10, 9, 7, 7, 5, 4, 4, 3, 2, 1)
+   res6: parallel.ascending: List(2, 4, 4, 10, 12, 1, 3, 5, 7, 7, 9)
 ========== END OF smallTestProgram ==========
 ========== START OF otherTestProgram ==========
+1000000 (thread id=1)
+100 (thread id=1)
   ===== RUN of quicksort for 1000000 elements =====
-      runtime: 0.4349915 sec
+      runtime: 0.7011969 sec
   ===== END OF RUN =====
   ===== START of testThreshhold =====
-      parallel quicksort with th:33 was best for 1000000 elements
-      with a runtime of 0.2316907 seconds
+      parallel quicksort with th:32 was best for 1000000 elements
+      with a runtime of 0.2507634 seconds
   ===== END of testThreshhold =====
-  == Speedup seq/parallel = 1.8774663808258163
+  == Speedup seq/parallel = 2.7962489741325887
   ===== START of testThreadpools =====
-      parallel quicksort with thread amount:14.0 was best for 1000000 elements
-      with a runtime of 0.2320374 seconds
-  == Speedup parallel/threadpool_optimized = 0.9985058443164766
+      parallel quicksort with thread amount:40.0 was best for 1000000 elements
+      with a runtime of 0.2513541 seconds
+  == Speedup parallel/threadpool_optimized = 0.9976499289249708
       parallel quicksort with GLOBALS threadpool was best for 1000000 elements
-      with a runtime of 0.312038 seconds
-  == Speedup parallel/threadpool_workstealing = 0.742507963773643
+      with a runtime of 0.2689144 seconds
+  == Speedup parallel/threadpool_workstealing = 0.9325026848692373
       parallel quicksort with GLOBALS threadpool was best for 1000000 elements
-      with a runtime of 0.252039 seconds
-  == Speedup parallel/threadpool_cached = 0.9192652724379956
+      with a runtime of 0.2602031 seconds
+  == Speedup parallel/threadpool_cached = 0.9637218003936157
       parallel quicksort with GLOBALS threadpool was best for 1000000 elements
-      with a runtime of 0.2559664 seconds
-  == Speedup parallel/threadpool_sheduled = 0.9051605992036456
+      with a runtime of 0.255897 seconds
+  == Speedup parallel/threadpool_sheduled = 0.979938803502972
   ===== END OF testThreadpools =====
 ========== END OF otherTestProgram ==========
 ================= End of Program =================
@@ -80,35 +122,35 @@ Process finished with exit code 0
 ## 1.3) Max: Advanced Future Concepts Part 1
 Max1 and Max2 deliver the same result
 ```text
-===== Test Invalid Partition Size =====
-   Exception Max1 = java.lang.IllegalStateException: Invalid Partition Size
-   Exception Max2 = java.lang.IllegalStateException: Invalid Partition Size
-===== END Test Invalid Partition Size =====
-
-===== Test Empty List =====
-   Exception Max1 = java.lang.IllegalArgumentException: List is empty
-   Exception Max2 = java.lang.IllegalArgumentException: List is empty
-===== END Test Empty List =====
+===== Test Null =====
+   Exception Max1 = java.lang.NullPointerException
+   Exception Max2 = java.lang.NullPointerException
+===== END Test Null =====
 
 ===== Negative Partition Size =====
    Exception Max1 = java.lang.IllegalStateException: Invalid Partition Size
    Exception Max2 = java.lang.IllegalStateException: Invalid Partition Size
 ===== END Negative Partition Size =====
 
-===== Test Null =====
-   Exception Max1 = java.lang.NullPointerException
-   Exception Max2 = java.lang.NullPointerException
-===== END Test Null =====
+===== Test Empty List =====
+   Exception Max1 = java.lang.IllegalArgumentException: List is empty
+   Exception Max2 = java.lang.IllegalArgumentException: List is empty
+===== END Test Empty List =====
+
+===== Test Invalid Partition Size =====
+   Exception Max1 = java.lang.IllegalStateException: Invalid Partition Size
+   Exception Max2 = java.lang.IllegalStateException: Invalid Partition Size
+===== END Test Invalid Partition Size =====
 
 ===== Test Success =====
    result of Max1 = 6
    result of Max2 = 6
 ===== END Test Success =====
 
-===== Valid List with 100000 Elements =====
+===== Valid List with 30.000.000 Elements =====
    result of Max1 = 1000
    result of Max2 = 1000
-===== END Valid List with 100000 Elements =====
+===== END Valid List with 30.000.000 Elements =====
 
 Process finished with exit code 0
 ```

@@ -13,30 +13,12 @@ object AdvancedFuture extends App {
       if (size == 0) throw new IllegalArgumentException("List is empty")
       val partitionSize: Int = size / parts
       if (partitionSize < 1) throw new IllegalStateException("Invalid Partition Size")
-
-      val lists = list.grouped(partitionSize)
-      var futureList = List.empty[Future[Int]]
-
-      lists.foreach(list => {
-        val a: Future[Int] = Future {
-          var max = Int.MinValue
-          list.foreach(elem => if(elem > max) max = elem)
-          max
-        }
-        futureList = a :: futureList
-      })
-
-      var max = Int.MinValue
-      futureList.foreach(list =>
-        list.foreach(value =>{
-          if (value > max) max = value
-        })
-      )
-
-      val computation: Future[List[Int]] = Future.sequence(futureList)
-      Await.ready(computation, Duration.Inf)
-      max
-    }
+      partitionSize
+    }.flatMap(partitionSize =>
+      Future.sequence(list.grouped(partitionSize)
+        .map(list => { Future { list.max }}))
+        .map(list => list.max)
+    )
   }
   // 1.3 b)
   def parallelMax2(list: List[Int], parts: Int): Future[Int] = {
@@ -45,49 +27,25 @@ object AdvancedFuture extends App {
       if (size == 0) throw new IllegalArgumentException("List is empty")
       val partitionSize: Int = size / parts
       if (partitionSize < 1) throw new IllegalStateException("Invalid Partition Size")
-
-      val lists = list.grouped(partitionSize)
-      var futureList = List.empty[Future[Int]]
-
-      lists.foreach(list => {
-        val a: Future[Int] = Future {
-          var max = Int.MinValue
-          list.foreach(elem => if (elem > max) max = elem)
-          max
-        }
-        futureList = a :: futureList
-      })
-
-      var max = Int.MinValue
-      futureList.foreach(list =>
-        list.foreach(value => {
-          if (value > max) max = value
-        })
-      )
-
-      val computation: Future[List[Int]] = myFutureSequence(futureList)
-      Await.ready(computation, Duration.Inf)
-
-      max
-    }
+      partitionSize
+    }.flatMap(partitionSize =>
+      myFutureSequence(list.grouped(partitionSize)
+        .map(list => { Future { list.max }}).toList)
+        .map(x => x.max))
   }
+
   // 1.3 b)
-  @tailrec
-  def sequenceRecur[T](values: List[T], futures: List[Future[T]]): List[T] = {
-    if (futures.isEmpty) return values
-
-    val first = futures.head
-    var current: T = null.asInstanceOf[T]
-    first.failed.foreach(ex => throw ex)
-    val result: Future[Unit] = first.map(value => current = value)
-    Await.result(result, Duration.Inf)
-    sequenceRecur(current :: values, futures.tail)
+  def sequenceRecur[T](values: List[T], futures: List[Future[T]]): Future[List[T]] = {
+    if (futures.isEmpty) return Future{ values }
+    futures.head.failed.foreach(ex => throw ex)
+    futures.head.flatMap(curr => {
+      sequenceRecur(values.appended(curr), futures.tail)
+    })
   }
+
 // 1.3 b)
   def myFutureSequence[T](futures: List[Future[T]]): Future[List[T]] = {
-    Future {
-      sequenceRecur(List.empty[T], futures)
-    }
+    sequenceRecur(List.empty[T], futures)
   }
 
   def generateRandomList(noOfElements: Int, upperBound: Int): List[Int] = {
@@ -113,6 +71,12 @@ object AdvancedFuture extends App {
           s"===== END $name =====\n")
       }
     }
+    val randList = generateRandomList(30000000, 1001)
+
+    val f11 = parallelMax1(randList, 10)
+    val f12 = parallelMax2(randList, 10)
+    registerHandlers(f11, f12, "Valid List with 30.000.000 Elements")
+
     val f1 = parallelMax1(List(1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5), 2)
     val f2 = parallelMax2(List(1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5), 2)
     registerHandlers(f1, f2, "Test Success")
@@ -133,12 +97,6 @@ object AdvancedFuture extends App {
     val f10 = parallelMax2(List(1,2,3), -1)
     registerHandlers(f9, f10, "Negative Partition Size")
 
-    val randList = generateRandomList(100000, 1001)
-
-    val f11 = parallelMax1(randList, 10)
-    val f12 = parallelMax2(randList, 10)
-    registerHandlers(f11, f12, "Valid List with 100000 Elements")
-
     val futureList: Future[List[Int]] = Future.sequence(
       List(f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12)
     )
@@ -146,5 +104,5 @@ object AdvancedFuture extends App {
   }
 
   test()
-  Thread.sleep(100)
+  Thread.sleep(1000)
 }

@@ -34,12 +34,10 @@ object ParallelQuickSort extends App{
         }
       }
       else {
-        val fLeft = Future{
-          quickSort(seq filter (ord.lt(_, pivot)))
-        }
-        val fRight = Future {
-          quickSort(seq filter (ord.gt(_, pivot)))
-        }
+        val fLeft = parallelQuickSort(seq filter (ord.lt(_, pivot)), threshHold)
+
+        val fRight = parallelQuickSort(seq filter (ord.gt(_, pivot)), threshHold)
+
         val middle = seq filter (ord.equiv(_, pivot))
 
         val tupleResult = FuturesBasics.doInParallel(fLeft, fRight)
@@ -64,12 +62,9 @@ object ParallelQuickSort extends App{
         }(ctx)
       }
       else {
-        val fLeft = Future{
-          quickSort(seq filter (ord.lt(_, pivot)))
-        }(ctx)
-        val fRight = Future {
-          quickSort(seq filter (ord.gt(_, pivot)))
-        }(ctx)
+        val fLeft = parallelQuickSort(seq filter (ord.lt(_, pivot)), threshHold, ctx)
+        val fRight = parallelQuickSort(seq filter (ord.gt(_, pivot)), threshHold, ctx)
+
         val middle = seq filter (ord.equiv(_, pivot))
 
         val tupleResult = FuturesBasics.doInParallel(fLeft, fRight)
@@ -139,12 +134,12 @@ object ParallelQuickSort extends App{
     Await.ready(res4, Duration.Inf)
     // explicit 1
     val res5 = parallelQuickSort(arr, 2)(Descender)
-    res5 foreach(set => println(s"   res5: parallel.ascending: $set"))
+    res5 foreach(set => println(s"   res5: parallel.descending: $set"))
     res5.failed.foreach(ex => println(s"   res5 EX: $ex"))
     Await.ready(res5, Duration.Inf)
     // explicit 2
     val res6 = parallelQuickSort(arr, 2)(comp)
-    res6 foreach(set => println(s"   res6: parallel.ascending: $set"))
+    res6 foreach(set => println(s"   res6: parallel.weirdscending: $set"))
     res6.failed.foreach(ex => println(s"   res6 EX: $ex"))
     Await.ready(res6, Duration.Inf)
 

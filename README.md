@@ -74,7 +74,6 @@ subsets: (Vector(5, 1, 6, 1, 5),Vector(1, 8, 9, 6, 8, 10)) (thread id=15)
 Process finished with exit code 0
 ```
 
-
 ## 1.2) (Parallel) Quicksort
 Experimenting with the thread pools brought no speedup,
 Changing the threshhold brought a small speedup.
@@ -85,33 +84,33 @@ Parallel is much faster than  sequential.
    sequential.: List(12, 10, 9, 7, 7, 5, 4, 4, 3, 2, 1)
    sequential.even left, odd right sorted ascending: List(2, 4, 4, 10, 12, 1, 3, 5, 7, 7, 9)
    res4: parallel.ascending: List(1, 2, 3, 4, 4, 5, 7, 7, 9, 10, 12)
-   res5: parallel.ascending: List(12, 10, 9, 7, 7, 5, 4, 4, 3, 2, 1)
+   res5: parallel.descending: List(12, 10, 9, 7, 7, 5, 4, 4, 3, 2, 1)
+   res6: parallel.weirdscending: List(2, 4, 4, 10, 12, 1, 3, 5, 7, 7, 9)
 ========== END OF smallTestProgram ==========
 ========== START OF otherTestProgram ==========
-   res6: parallel.ascending: List(2, 4, 4, 10, 12, 1, 3, 5, 7, 7, 9)
 1000000 (thread id=1)
 100 (thread id=1)
   ===== RUN of quicksort for 1000000 elements =====
-      runtime: 0.5789255 sec
+      runtime: 0.8370243 sec
   ===== END OF RUN =====
   ===== START of testThreshhold =====
-      parallel quicksort with th:36 was best for 1000000 elements
-      with a runtime of 0.1896849 seconds
+      parallel quicksort with th:40 was best for 1000000 elements
+      with a runtime of 0.3560749 seconds
   ===== END of testThreshhold =====
-  == Speedup seq/parallel = 3.052037879662535
+  == Speedup seq/parallel = 2.3506972830716233
   ===== START of testThreadpools =====
-      parallel quicksort with thread amount:18.0 was best for 1000000 elements
-      with a runtime of 0.1799105 seconds
-  == Speedup parallel/threadpool_optimized = 1.0543292359256407
+      parallel quicksort with thread amount:31.0 was best for 1000000 elements
+      with a runtime of 0.351009 seconds
+  == Speedup parallel/threadpool_optimized = 1.0144323934713926
       parallel quicksort with GLOBALS threadpool was best for 1000000 elements
-      with a runtime of 0.2054125 seconds
-  == Speedup parallel/threadpool_workstealing = 0.9234340655997079
+      with a runtime of 0.4412771 seconds
+  == Speedup parallel/threadpool_workstealing = 0.8069190538099531
       parallel quicksort with GLOBALS threadpool was best for 1000000 elements
-      with a runtime of 0.1955228 seconds
-  == Speedup parallel/threadpool_cached = 0.9701421010746573
+      with a runtime of 0.3396738 seconds
+  == Speedup parallel/threadpool_cached = 1.0482848544691996
       parallel quicksort with GLOBALS threadpool was best for 1000000 elements
-      with a runtime of 0.2165295 seconds
-  == Speedup parallel/threadpool_sheduled = 0.8760233594036839
+      with a runtime of 0.3707668 seconds
+  == Speedup parallel/threadpool_sheduled = 0.9603742837816116
   ===== END OF testThreadpools =====
 ========== END OF otherTestProgram ==========
 ================= End of Program =================
